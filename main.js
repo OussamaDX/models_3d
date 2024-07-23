@@ -367,46 +367,59 @@ function init() {
     stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild( stats.dom );
     // // Create a function to animate our scene
-    function animate() {
-        stats.begin();
+var lastFrameTime = 0;
+var frameDelay = 1000 / 30; // 30 fps
 
+function animate(currentTime) {
+    stats.begin();
+
+    // Limit frame rate to 30 fps
+    if (currentTime - lastFrameTime < frameDelay) {
         requestAnimationFrame(animate);
-        if (ballModel && tableModel)
-            {
-                ballModel.translateX(x_velocity);
-                ballModel.translateZ(z_velocity );
-                //     // Constrain the ball's x position to the table width
-                if (tableWidth > 0)
-                    { 
-                        // Ensure tableWidth is initialized
-                        if (ballModel.position.x > tableWidth / 2) 
-                {
-                    ballModel.position.x = tableWidth / 2;
-                    x_velocity = -Math.abs(x_velocity);
-                } else if (ballModel.position.x < -tableWidth / 2) {
-                    ballModel.position.x = -tableWidth / 2;
-                    x_velocity = Math.abs(x_velocity);
-                }
-            }
-            checkCollision();
-        }
-        if (moveLeftPlayer) {
-            player_model.position.x -= 0.05;
-        }
-        if (moveRightPlayer) {
-            player_model.position.x += 0.05;
-        }
-        
-        if (moveLeftComputer) {
-            computer.position.x -= 0.05;
-        }
-        if (moveRightComputer) {
-            computer.position.x += 0.05;
-        }
-        stats.end();
-        controls.update();
-        renderer.render(scene, camera);
+        return;
     }
+
+    // Update lastFrameTime for the next frame calculation
+    lastFrameTime = currentTime;
+
+    requestAnimationFrame(animate);
+
+    if (ballModel && tableModel) {
+        ballModel.translateX(x_velocity);
+        ballModel.translateZ(z_velocity);
+
+        // Constrain the ball's x position to the table width
+        if (tableWidth > 0) {
+            if (ballModel.position.x > tableWidth / 2) {
+                ballModel.position.x = tableWidth / 2;
+                x_velocity = -Math.abs(x_velocity);
+            } else if (ballModel.position.x < -tableWidth / 2) {
+                ballModel.position.x = -tableWidth / 2;
+                x_velocity = Math.abs(x_velocity);
+            }
+        }
+        checkCollision();
+    }
+
+    if (moveLeftPlayer) {
+        player_model.position.x -= 0.05;
+    }
+    if (moveRightPlayer) {
+        player_model.position.x += 0.05;
+    }
+
+    if (moveLeftComputer) {
+        computer.position.x -= 0.05;
+    }
+    if (moveRightComputer) {
+        computer.position.x += 0.05;
+    }
+
+    stats.end();
+    controls.update();
+    renderer.render(scene, camera);
+}
+
     
     // Run the animation function for the first time to kick things off
     animate();
