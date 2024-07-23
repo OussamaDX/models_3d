@@ -2,11 +2,13 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'; // Import the FBXLoader
+import Stats from '/nfs/homes/ooussaad/Desktop/my-threejs-project2/node_modules/stats.js/src/Stats.js';
 
 let scene, camera, renderer, controls;
 let computer = null;
 let ballModel = null;
 let player_model = null;
+let score_board = null;
 let bg_scene =null;
 let tableModel = null;
 let tableWidth = 0; // Width of the table, to be determined dynamically
@@ -16,6 +18,15 @@ let moveLeftPlayer = false;
 let moveRightPlayer = false;
 let moveLeftComputer = false;
 let moveRightComputer = false;
+let computer_score = 0;
+let player_score = 0;
+let player_score_text = "player :";
+let computer_score_text = "player :";
+let textMesh = null;
+let textMesh_computer = null;
+let textMesh_player = null;
+let textMesh_score_player = null;
+let textMesh_score_computer = null;
 
 function init() {
     // Create a scene
@@ -110,6 +121,108 @@ function init() {
         player_model.scale.set(1, 1, 1);
     });
 
+
+    //load the soccer board
+    const loader_board = new GLTFLoader();
+    loader_board.load('/score.glb', (glb) => {
+        score_board = glb.scene;
+        scene.add(score_board);
+        score_board.position.set(0, 5, -1);
+        score_board.scale.set(0.5, 0.3, 0.3);
+        // score_board.rotation.y =Math.PI / 4; // 30 degrees in radians
+        score_board.rotation.y = Math.PI; // 30 degrees in radians
+        // score_board.rotation.x = Math.PI / 4; // 30 degrees in radians
+    });
+    
+
+    // computer score
+    // player score
+    const text_loader_computer = new THREE.FontLoader();
+    text_loader_computer.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const textGeometry = new THREE.TextGeometry('Computer ', {
+            font: font,
+            size: 0.2,
+            height: 0.2,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelSegments: 5
+        });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        textMesh_score_computer = new THREE.Mesh(textGeometry, textMaterial);
+        textMesh_score_computer.position.set(0.4, 6.3, -4.5);
+        scene.add(textMesh_score_computer);
+    });
+
+    const loader1 = new THREE.FontLoader();
+    loader1.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const textGeometry = new THREE.TextGeometry(computer_score.toString(), {
+            font: font,
+            size: 0.6,
+            height: 0.2,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelSegments: 5
+        });
+
+        // Create a material and a mesh
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+        // Position the text
+        textMesh.position.set(0.7, 5.6, -4.5);
+
+        // Add the text to the scene
+        scene.add(textMesh);
+    });
+
+
+    // player score
+    const text_loader_player = new THREE.FontLoader();
+    text_loader_player.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const textGeometry = new THREE.TextGeometry('PLAYER ', {
+            font: font,
+            size: 0.2,
+            height: 0.2,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelSegments: 5
+        });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        textMesh_score_player = new THREE.Mesh(textGeometry, textMaterial);
+        textMesh_score_player.position.set(-1.2, 6.3, -4.5);
+        scene.add(textMesh_score_player);
+    });
+
+    const text_load = new THREE.FontLoader();
+    text_load.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const textGeometry = new THREE.TextGeometry(player_score.toString(), {
+            font: font,
+            size: 0.6,
+            height: 0.2,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelSegments: 5
+        });
+
+        // Create a material and a mesh
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        textMesh_player = new THREE.Mesh(textGeometry, textMaterial);
+
+        // Position the text
+        textMesh_player.position.set(-1, 5.6, -4.5);
+
+        // Add the text to the scene
+        scene.add(textMesh_player);
+    });
+
     // Adding bounding boxes to our cubes
     const playerBB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
     const ballBB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
@@ -140,34 +253,133 @@ function init() {
             }
             else if (ballModel.position.z > 1.6)
             {
-                console.log('Player hit');
+                // console.log('Player hit');
+                console.log("computer ----------------");
+                computer_score++;
                 resetBallPosition();
             }
             else if (ballModel.position.z < -7)
             {
-                resetBallPosition();
+                console.log("player ----------------");
+                player_score++;
+                resetBallPosition_player();
             }
         }
     }
+
+    function update_text()
+    {
+        // console.log("Updating text... =>>> ",textMesh);
+        if (textMesh)
+        {
+            console.log("remove the model ......");
+            scene.remove(textMesh);
+            textMesh.geometry.dispose();
+            textMesh.material.dispose();
+            textMesh = null;
+            console.log("-------------------------------------------------dx");
+        }
+        // Load the font and create the new text geometry
+        const loader1 = new THREE.FontLoader();
+        loader1.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textGeometry = new THREE.TextGeometry(computer_score.toString(), {
+                font: font,
+                size: 0.6,
+                height: 0.2,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelSegments: 5
+            });
+
+            // Create a material and a new mesh
+            const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+            // Position the text
+            textMesh.position.set(0.7, 5.6, -4.5);
+
+            // Add the new text to the scene
+            scene.add(textMesh);
+            console.log("add the model ......");
+        });
+    }
+
+    function update_text_player()
+    {
+        // console.log("Updating text... =>>> ",textMesh);
+        if (textMesh_player)
+        {
+            console.log("remove the model ......");
+            scene.remove(textMesh_player);
+            textMesh_player.geometry.dispose();
+            textMesh_player.material.dispose();
+            textMesh_player = null;
+            console.log("-------------------------------------------------dx");
+        }
+        // Load the font and create the new text geometry
+        const loader1 = new THREE.FontLoader();
+        loader1.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textGeometry = new THREE.TextGeometry(player_score.toString(), {
+                font: font,
+                size: 0.6,
+                height: 0.2,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelSegments: 5
+            });
+
+            // Create a material and a new mesh
+            const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            textMesh_player = new THREE.Mesh(textGeometry, textMaterial);
+
+            // Position the text
+            textMesh_player.position.set(-1, 5.6, -4.5);
+
+            // Add the new text to the scene
+            scene.add(textMesh_player);
+            console.log("add the model ......");
+        });
+    }
+
     function resetBallPosition()
     {
         ballModel.position.set(0.5, 0.9, -2.5); // Reset the ball to the center of the table
         z_velocity = 0.05; // Reset the velocities if needed
         x_velocity = 0.05;
+        update_text();
     }
 
+
+
+    function resetBallPosition_player()
+    {
+        ballModel.position.set(0.5, 0.9, -2.5); // Reset the ball to the center of the table
+        z_velocity = 0.05; // Reset the velocities if needed
+        x_velocity = 0.05;
+        update_text_player();
+    }
+
+    var stats = new Stats();
+    stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( stats.dom );
     // // Create a function to animate our scene
     function animate() {
+        stats.begin();
+
         requestAnimationFrame(animate);
         if (ballModel && tableModel)
-        {
-            ballModel.translateX(x_velocity);
-            ballModel.translateZ(z_velocity );
-        //     // Constrain the ball's x position to the table width
-            if (tableWidth > 0)
-            { 
-                // Ensure tableWidth is initialized
-                if (ballModel.position.x > tableWidth / 2) 
+            {
+                ballModel.translateX(x_velocity);
+                ballModel.translateZ(z_velocity );
+                //     // Constrain the ball's x position to the table width
+                if (tableWidth > 0)
+                    { 
+                        // Ensure tableWidth is initialized
+                        if (ballModel.position.x > tableWidth / 2) 
                 {
                     ballModel.position.x = tableWidth / 2;
                     x_velocity = -Math.abs(x_velocity);
@@ -178,24 +390,24 @@ function init() {
             }
             checkCollision();
         }
-
         if (moveLeftPlayer) {
             player_model.position.x -= 0.05;
         }
         if (moveRightPlayer) {
             player_model.position.x += 0.05;
         }
-
+        
         if (moveLeftComputer) {
             computer.position.x -= 0.05;
         }
         if (moveRightComputer) {
             computer.position.x += 0.05;
         }
+        stats.end();
         controls.update();
         renderer.render(scene, camera);
     }
-
+    
     // Run the animation function for the first time to kick things off
     animate();
 
