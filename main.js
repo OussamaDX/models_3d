@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'; // Import the FBXLoader
-import Stats from '/nfs/homes/ooussaad/Desktop/my-threejs-project2/node_modules/stats.js/src/Stats.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 let scene, camera, renderer, controls;
 let computer = null;
@@ -77,23 +77,6 @@ function init() {
         console.log("-----",tableWidth)
     });
 
-    // // // Load the GLTF models
-    // const gltfLoader = new GLTFLoader();
-    // gltfLoader.load('/sci_table/scene.gltf', (gltf) => {
-    //     tableModel = gltf.scene;
-    //     tableModel.position.set(0, 1, 0);
-    //     tableModel.scale.set(1.1, 1.1, 1.1); // Adjust the scale if necessary
-    //     scene.add(tableModel);
-
-    //     // Calculate the bounding box of the table model
-    //     const box = new THREE.Box3().setFromObject(tableModel);
-    //     const size = new THREE.Vector3();
-    //     box.getSize(size);
-    //     tableWidth = size.x;
-    // }, undefined, (error) => {
-    //     console.error('An error occurred while loading the GLTF model:', error);
-    // });
-
     const loader_cpm = new GLTFLoader();
     loader_cpm.load('paddle_hock.glb', (glb) => { // computer player
         computer = glb.scene;
@@ -137,12 +120,12 @@ function init() {
 
     // computer score
     // player score
-    const text_loader_computer = new THREE.FontLoader();
+    const text_loader_computer = new FontLoader();
     text_loader_computer.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const textGeometry = new THREE.TextGeometry('Computer ', {
+        const textGeometry = new TextGeometry('Computer ', {
             font: font,
             size: 0.2,
-            height: 0.2,
+            depth: 0.2,
             curveSegments: 12,
             bevelEnabled: true,
             bevelThickness: 0.03,
@@ -155,12 +138,12 @@ function init() {
         scene.add(textMesh_score_computer);
     });
 
-    const loader1 = new THREE.FontLoader();
+    const loader1 = new FontLoader();
     loader1.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const textGeometry = new THREE.TextGeometry(computer_score.toString(), {
+        const textGeometry = new TextGeometry(computer_score.toString(), {
             font: font,
             size: 0.6,
-            height: 0.2,
+            depth: 0.2,
             curveSegments: 12,
             bevelEnabled: true,
             bevelThickness: 0.03,
@@ -181,12 +164,12 @@ function init() {
 
 
     // player score
-    const text_loader_player = new THREE.FontLoader();
+    const text_loader_player = new FontLoader();
     text_loader_player.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const textGeometry = new THREE.TextGeometry('PLAYER ', {
+        const textGeometry = new TextGeometry('PLAYER ', {
             font: font,
             size: 0.2,
-            height: 0.2,
+            depth: 0.2,
             curveSegments: 12,
             bevelEnabled: true,
             bevelThickness: 0.03,
@@ -199,12 +182,12 @@ function init() {
         scene.add(textMesh_score_player);
     });
 
-    const text_load = new THREE.FontLoader();
+    const text_load = new FontLoader();
     text_load.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const textGeometry = new THREE.TextGeometry(player_score.toString(), {
+        const textGeometry = new TextGeometry(player_score.toString(), {
             font: font,
             size: 0.6,
-            height: 0.2,
+            depth: 0.2,
             curveSegments: 12,
             bevelEnabled: true,
             bevelThickness: 0.03,
@@ -280,12 +263,12 @@ function init() {
             console.log("-------------------------------------------------dx");
         }
         // Load the font and create the new text geometry
-        const loader1 = new THREE.FontLoader();
+        const loader1 = new FontLoader();
         loader1.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-            const textGeometry = new THREE.TextGeometry(computer_score.toString(), {
+            const textGeometry = new TextGeometry(computer_score.toString(), {
                 font: font,
                 size: 0.6,
-                height: 0.2,
+                depth: 0.2,
                 curveSegments: 12,
                 bevelEnabled: true,
                 bevelThickness: 0.03,
@@ -319,12 +302,12 @@ function init() {
             console.log("-------------------------------------------------dx");
         }
         // Load the font and create the new text geometry
-        const loader1 = new THREE.FontLoader();
+        const loader1 = new FontLoader();
         loader1.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-            const textGeometry = new THREE.TextGeometry(player_score.toString(), {
+            const textGeometry = new TextGeometry(player_score.toString(), {
                 font: font,
                 size: 0.6,
-                height: 0.2,
+                depth: 0.2,
                 curveSegments: 12,
                 bevelEnabled: true,
                 bevelThickness: 0.03,
@@ -363,24 +346,7 @@ function init() {
         update_text_player();
     }
 
-    var stats = new Stats();
-    stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild( stats.dom );
-    // // Create a function to animate our scene
-var lastFrameTime = 0;
-var frameDelay = 1000 / 30; // 30 fps
-
 function animate(currentTime) {
-    stats.begin();
-
-    // Limit frame rate to 30 fps
-    if (currentTime - lastFrameTime < frameDelay) {
-        requestAnimationFrame(animate);
-        return;
-    }
-
-    // Update lastFrameTime for the next frame calculation
-    lastFrameTime = currentTime;
 
     requestAnimationFrame(animate);
 
@@ -401,21 +367,21 @@ function animate(currentTime) {
         checkCollision();
     }
 
-    if (moveLeftPlayer) {
+    if (moveLeftPlayer && player_model.position.x > -tableWidth / 2) {
         player_model.position.x -= 0.05;
     }
-    if (moveRightPlayer) {
+    if (moveRightPlayer && player_model.position.x < tableWidth / 2) {
         player_model.position.x += 0.05;
     }
 
-    if (moveLeftComputer) {
+    // Update computer paddle position with boundary check
+    if (moveLeftComputer && computer.position.x > -tableWidth / 2) {
         computer.position.x -= 0.05;
     }
-    if (moveRightComputer) {
+    if (moveRightComputer && computer.position.x < tableWidth / 2) {
         computer.position.x += 0.05;
     }
 
-    stats.end();
     controls.update();
     renderer.render(scene, camera);
 }
@@ -436,25 +402,32 @@ function animate(currentTime) {
         if (!player_model || !computer) return;
         switch (event.key) {
             case 'ArrowLeft':
-                moveLeftPlayer = true;
-                controls.enabled = false;
+                if (player_model.position.x > -tableWidth / 2) { // Check left boundary
+                    moveLeftPlayer = true;
+                    controls.enabled = false;
+                }
                 break;
             case 'ArrowRight':
-                moveRightPlayer = true;
-                controls.enabled = false;
+                if (player_model.position.x < tableWidth / 2) { // Check right boundary
+                    moveRightPlayer = true;
+                    controls.enabled = false;
+                }
                 break;
             case 'a': // 'a' key for moving the computer paddle left
-                moveLeftComputer = true;
-                controls.enabled = false;
+                if (computer.position.x > -tableWidth / 2) { // Check left boundary
+                    moveLeftComputer = true;
+                    controls.enabled = false;
+                }
                 break;
             case 'd': // 'd' key for moving the computer paddle right
-                moveRightComputer = true;
-                controls.enabled = false;
+                if (computer.position.x < tableWidth / 2) { // Check right boundary
+                    moveRightComputer = true;
+                    controls.enabled = false;
+                }
                 break;
         }
     });
 
-    // Handle keyup events
     window.addEventListener('keyup', (event) => {
         if (!player_model || !computer) return;
         switch (event.key) {
